@@ -2,7 +2,7 @@
 using Dalamud.Plugin;
 using System;
 
-namespace OofPlugin
+namespace OofPluginFixed
 {
     [Serializable]
     public class Configuration : IPluginConfiguration

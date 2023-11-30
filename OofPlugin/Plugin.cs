@@ -6,6 +6,7 @@ using Dalamud.Game.Command;
 using Dalamud.IoC;
 using Dalamud.Logging;
 using Dalamud.Plugin;
+using Dalamud.Plugin.Services;
 using Dalamud.Utility;
 using NAudio.Wave;
 using System;
@@ -18,8 +19,20 @@ using System.Threading.Tasks;
 
 //shoutout anna clemens
 
-namespace OofPlugin
+namespace OofPluginFixed
 {
+    public class Service {
+        [PluginService] public static DalamudPluginInterface PluginInterface { get; private set; } = null!;
+        [PluginService] public static IFramework Framework { get; private set; } = null!;
+        [PluginService] public static IClientState ClientState { get; private set; } = null!;
+        [PluginService] public static ICondition Condition { get; private set; } = null!;
+        [PluginService] public static IPartyList PartyList { get; private set; } = null!;
+        [PluginService] public static ICommandManager CommandManager { get; private set; } = null!;
+        [PluginService] public static Configuration Configuration { get; set; } = null!;
+        [PluginService] public static PluginUI PluginUi { get; set; } = null!;
+        [PluginService] public static IAddonLifecycle AddonLifecycle { get; private set; } = null!;
+    }
+
     public sealed class Plugin : IDalamudPlugin
     {
         public string Name => "OOF";
@@ -28,16 +41,6 @@ namespace OofPlugin
         private const string oofSettings = "/oofsettings";
         private const string oofVideo = "/oofvideo";
 
-        [PluginService] public static Framework Framework { get; private set; } = null!;
-        [PluginService] public static ClientState ClientState { get; private set; } = null!;
-        [PluginService] public static Condition Condition { get; private set; } = null!;
-        [PluginService] public static PartyList PartyList { get; private set; } = null!;
-        //[PluginService] public static ObjectTable ObjectTable { get; private set; } = null!;
-
-        private DalamudPluginInterface PluginInterface { get; init; }
-        private CommandManager CommandManager { get; init; }
-        private Configuration Configuration { get; init; }
-        private PluginUI PluginUi { get; init; }
         private OofHelpers OofHelpers { get; init; }
 
         // i love global variables!!!! the more global the more globaly it gets
@@ -64,36 +67,35 @@ namespace OofPlugin
         public CancellationTokenSource CancelToken;
 
         public Plugin(
-            [RequiredVersion("1.0")] DalamudPluginInterface pluginInterface,
-            [RequiredVersion("1.0")] CommandManager commandManager)
+            [RequiredVersion("1.0")] DalamudPluginInterface PluginInterface)
         {
-            PluginInterface = pluginInterface;
-            CommandManager = commandManager;
-            Configuration = PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
-            Configuration.Initialize(PluginInterface);
+            PluginInterface.Create<Service>();
 
-            PluginUi = new PluginUI(Configuration, this, PluginInterface);
+            Service.Configuration = PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
+            Service.Configuration.Initialize(PluginInterface);
+
+            Service.PluginUi = new PluginUI(Service.Configuration, this, PluginInterface);
             OofHelpers = new OofHelpers();
 
             // load audio file. idk if this the best way
             LoadSoundFile();
 
-            CommandManager.AddHandler(oofCommand, new CommandInfo(OnCommand)
+            Service.CommandManager.AddHandler(oofCommand, new CommandInfo(OnCommand)
             {
                 HelpMessage = "play oof sound"
             });
-            CommandManager.AddHandler(oofSettings, new CommandInfo(OnCommand)
+            Service.CommandManager.AddHandler(oofSettings, new CommandInfo(OnCommand)
             {
                 HelpMessage = "change oof settings"
             });
-            CommandManager.AddHandler(oofVideo, new CommandInfo(OnCommand)
+            Service.CommandManager.AddHandler(oofVideo, new CommandInfo(OnCommand)
             {
                 HelpMessage = "open Hbomberguy video on OOF.mp3"
             });
 
             PluginInterface.UiBuilder.Draw += DrawUI;
             PluginInterface.UiBuilder.OpenConfigUi += DrawConfigUI;
-            Framework.Update += FrameworkOnUpdate;
+            Service.Framework.Update += FrameworkOnUpdate;
 
             // lmao
             CancelToken = new CancellationTokenSource();
@@ -102,38 +104,38 @@ namespace OofPlugin
         }
         public void LoadSoundFile()
         {
-            if (Configuration.DefaultSoundImportPath.Length == 0)
+            if (Service.Configuration.DefaultSoundImportPath.Length == 0)
             {
-                var path = Path.Combine(PluginInterface.AssemblyLocation.Directory?.FullName!, "oof.wav");
+                var path = Path.Combine(Service.PluginInterface.AssemblyLocation.Directory?.FullName!, "oof.wav");
                 soundFile = path;
                 return;
             }
-            soundFile = Configuration.DefaultSoundImportPath;
+            soundFile = Service.Configuration.DefaultSoundImportPath;
         }
         private void OnCommand(string command, string args)
         {
             if (command == oofCommand) PlaySound(CancelToken.Token);
-            if (command == oofSettings) PluginUi.SettingsVisible = true;
+            if (command == oofSettings) Service.PluginUi.SettingsVisible = true;
             if (command == oofVideo) OpenVideo();
 
         }
 
         private void DrawUI()
         {
-            PluginUi.Draw();
+            Service.PluginUi.Draw();
         }
 
         private void DrawConfigUI()
         {
-            PluginUi.SettingsVisible = true;
+            Service.PluginUi.SettingsVisible = true;
         }
-        private void FrameworkOnUpdate(Framework framework)
+        private void FrameworkOnUpdate(IFramework framework)
         {
-            if (ClientState == null || ClientState.LocalPlayer == null) return;
+            if (Service.ClientState == null || Service.ClientState.LocalPlayer == null) return;
             try
             {
-                if (Configuration.OofOnFall) CheckFallen();
-                if (Configuration.OofOnDeath) CheckDeath();
+                if (Service.Configuration.OofOnFall) CheckFallen();
+                if (Service.Configuration.OofOnDeath) CheckDeath();
             }
             catch (Exception e)
             {
@@ -147,20 +149,20 @@ namespace OofPlugin
         /// </summary>
         private void CheckDeath()
         {
-            if (!Configuration.OofOnDeathBattle && Condition[ConditionFlag.InCombat]) return;
+            if (!Service.Configuration.OofOnDeathBattle && Service.Condition[ConditionFlag.InCombat]) return;
 
-            if (PartyList != null && PartyList.Any())
+            if (Service.PartyList != null && Service.PartyList.Any())
             {
-                if (Configuration.OofOnDeathAlliance && PartyList.Length == 8 && PartyList.GetAllianceMemberAddress(0) != IntPtr.Zero) // the worst "is alliance" check
+                if (Service.Configuration.OofOnDeathAlliance && Service.PartyList.Length == 8 && Service.PartyList.GetAllianceMemberAddress(0) != IntPtr.Zero) // the worst "is alliance" check
                 {
                     try
                     {
                         for (int i = 0; i < 16; i++)
                         {
-                            var allianceMemberAddress = PartyList.GetAllianceMemberAddress(i);
+                            var allianceMemberAddress = Service.PartyList.GetAllianceMemberAddress(i);
                             if (allianceMemberAddress == IntPtr.Zero) throw new NullReferenceException("allience member address is null");
 
-                            var allianceMember = PartyList.CreateAllianceMemberReference(allianceMemberAddress) ?? throw new NullReferenceException("allience reference is null");
+                            var allianceMember = Service.PartyList.CreateAllianceMemberReference(allianceMemberAddress) ?? throw new NullReferenceException("allience reference is null");
                             OofHelpers.AddRemoveDeadPlayer(allianceMember);
                         }
                     }
@@ -169,19 +171,19 @@ namespace OofPlugin
                         PluginLog.LogError("failed alliance check", e.Message);
                     }
                 }
-                if (Configuration.OofOnDeathParty)
+                if (Service.Configuration.OofOnDeathParty)
                 {
-                    foreach (var member in PartyList)
+                    foreach (var member in Service.PartyList)
                     {
-                        OofHelpers.AddRemoveDeadPlayer(member, member.Territory.Id == ClientState!.TerritoryType);
+                        OofHelpers.AddRemoveDeadPlayer(member, member.Territory.Id == Service.ClientState!.TerritoryType);
                     }
                 }
 
             }
             else
             {
-                if (Configuration.OofOnDeathSelf) return;
-                OofHelpers.AddRemoveDeadPlayer(ClientState!.LocalPlayer!);
+                if (Service.Configuration.OofOnDeathSelf) return;
+                OofHelpers.AddRemoveDeadPlayer(Service.ClientState!.LocalPlayer!);
             }
 
         }
@@ -192,12 +194,12 @@ namespace OofPlugin
         private void CheckFallen()
         {
             // dont run btwn moving areas & also wont work in combat
-            if (Condition[ConditionFlag.BetweenAreas]) return;
-            if (!Configuration.OofOnFallBattle && Condition[ConditionFlag.InCombat]) return;
-            if (!Configuration.OofOnFallMounted && (Condition[ConditionFlag.Mounted] || Condition[ConditionFlag.Mounted2])) return;
+            if (Service.Condition[ConditionFlag.BetweenAreas]) return;
+            if (!Service.Configuration.OofOnFallBattle && Service.Condition[ConditionFlag.InCombat]) return;
+            if (!Service.Configuration.OofOnFallMounted && (Service.Condition[ConditionFlag.Mounted] || Service.Condition[ConditionFlag.Mounted2])) return;
 
-            var isJumping = Condition[ConditionFlag.Jumping];
-            var pos = ClientState!.LocalPlayer!.Position.Y;
+            var isJumping = Service.Condition[ConditionFlag.Jumping];
+            var pos = Service.ClientState!.LocalPlayer!.Position.Y;
             var velocity = prevPos - pos;
 
             if (isJumping && !wasJumping)
@@ -245,7 +247,7 @@ namespace OofPlugin
 
                 var audioStream = new WaveChannel32(reader)
                 {
-                    Volume = Configuration.Volume * volume,
+                    Volume = Service.Configuration.Volume * volume,
                     PadWithZeroes = false // you need this or else playbackstopped event will not fire
                 };
                 using (reader)
@@ -300,15 +302,15 @@ namespace OofPlugin
                 await Task.Delay(200, token);
                 if (token.IsCancellationRequested) break;
                 if (!OofHelpers.DeadPlayers.Any()) continue;
-                if (ClientState!.LocalPlayer! == null) continue;
+                if (Service.ClientState!.LocalPlayer! == null) continue;
                 foreach (var player in OofHelpers.DeadPlayers)
                 {
                     if (player.DidPlayOof) continue;
                     float volume = 1f;
-                    if (Configuration.DistanceBasedOof && player.Distance != Vector3.Zero && player.Distance != ClientState!.LocalPlayer!.Position)
+                    if (Service.Configuration.DistanceBasedOof && player.Distance != Vector3.Zero && player.Distance != Service.ClientState!.LocalPlayer!.Position)
                     {
-                        var dist = Vector3.Distance(ClientState!.LocalPlayer!.Position, player.Distance);
-                        volume = Math.Max(Configuration.DistanceMinVolume, 1f / (dist * Configuration.DistanceFalloff));
+                        var dist = Vector3.Distance(Service.ClientState!.LocalPlayer!.Position, player.Distance);
+                        volume = Math.Max(Service.Configuration.DistanceMinVolume, 1f / (dist * Service.Configuration.DistanceFalloff));
                     }
                     PlaySound(token, volume);
                     player.DidPlayOof = true;
@@ -323,14 +325,14 @@ namespace OofPlugin
         /// </summary>
         public void Dispose()
         {
-            PluginUi.Dispose();
-            CommandManager.RemoveHandler(oofCommand);
-            CommandManager.RemoveHandler(oofSettings);
-            CommandManager.RemoveHandler(oofVideo);
+            Service.PluginUi.Dispose();
+            Service.CommandManager.RemoveHandler(oofCommand);
+            Service.CommandManager.RemoveHandler(oofSettings);
+            Service.CommandManager.RemoveHandler(oofVideo);
             CancelToken.Cancel();
             CancelToken.Dispose();
 
-            Framework.Update -= FrameworkOnUpdate;
+            Service.Framework.Update -= FrameworkOnUpdate;
             try
             {
                 while (isSoundPlaying)

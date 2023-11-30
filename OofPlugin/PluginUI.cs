@@ -2,6 +2,7 @@
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Components;
 using Dalamud.Interface.ImGuiFileDialog;
+using Dalamud.Interface.Utility;
 using Dalamud.Plugin;
 using Dalamud.Utility;
 using ImGuiNET;
@@ -11,14 +12,13 @@ using System.IO;
 using System.Numerics;
 using System.Text.RegularExpressions;
 
-namespace OofPlugin
+namespace OofPluginFixed
 {
     partial class PluginUI : IDisposable
     {
         private Configuration configuration;
 
         private Plugin plugin;
-        private readonly TextureWrap creditsTexture;
         private FileDialogManager manager { get; }
         private bool settingsVisible = false;
         private float fallOptionsHeight = 0;
@@ -37,8 +37,6 @@ namespace OofPlugin
                 AddedWindowFlags = ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking,
             };
             var imagePath = Path.Combine(pluginInterface.AssemblyLocation.Directory?.FullName!, "credits.png");
-
-            this.creditsTexture = pluginInterface.UiBuilder.LoadImage(imagePath)!;
         }
 
         public void Draw()
@@ -211,25 +209,6 @@ namespace OofPlugin
 
                 ImGui.Separator();
                 ImGuiHelpers.SafeTextColoredWrapped(ImGuiColors.DalamudGrey, "Original Oof sound by Joey Kuras");
-
-                //logo
-                var size = new Vector2(this.creditsTexture.Width * (float)0.60, this.creditsTexture.Height * (float)0.60);
-                ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, Vector2.Zero);
-                ImGui.PushStyleVar(ImGuiStyleVar.FrameRounding, 13);
-                ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0, 0, 0, 0));
-                ImGui.SetCursorPos(ImGui.GetWindowSize() - size);
-
-                if (ImGui.ImageButton(this.creditsTexture.ImGuiHandle, size)) Util.OpenLink("https://github.com/Frogworks-Interactive");
-                ImGui.PopStyleVar(2);
-                ImGui.PopStyleColor();
-                if (ImGui.IsItemHovered())
-                {
-                    ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
-                    ImGui.BeginTooltip();
-                    ImGui.Text("Visit Github");
-
-                    ImGui.EndTooltip();
-                }
 
                 manager.Draw();
             }

@@ -1,19 +1,19 @@
-name: OOF!
-author: Frogworks Interactive
-punchline: Play the OOF! sound on fall and/or death. The Only Plugin You Need!
+name: OOFingway
+author: MaraDawn
+punchline: Play the OOF! sound on fall and/or death. TEST LMAO
 description: |-
   i love roblox!!! 
              
   craaazzzy features
     - oof on party & alliance deaths!
     - use custom mp3 sounds! 
-    - DBO© (Distance Based Oof)!
+    - DBOï¿½ (Distance Based Oof)!
     - instant access to the hour long documentary on oof by hbomberguy!
     - fully featured settings window!
             
-repo_url: https://github.com/Frogworks-Interactive/OOF
-internal_name: OofPlugin
-dalamud_api_level: 8
+repo_url: https://github.com/Mara-Dawn/OOF
+internal_name: OofPluginFixed
+dalamud_api_level: 9
 tags:
   - Oof
   - Fall Damage
