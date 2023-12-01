@@ -11,11 +11,11 @@
         "DalamudApiLevel": 9,
         "IconUrl": "https://raw.githubusercontent.com/Mara-Dawn/OOF/main/Data/logo.png",
         "ImageUrls": [],
-        "DownloadLinkInstall": "https://github.com/Mara-Dawn/OOF/tree/main/releases/latest/download/latest.zip",
+        "DownloadLinkInstall": "https://github.com/Mara-Dawn/OOF/raw/main/releases/latest/download/latest.zip",
         "IsHide": false,
         "IsTestingExclusive": false,
-        "DownloadLinkTesting": "https://github.com/Mara-Dawn/OOF/tree/main/releases/latest/download/latest.zip",
-        "DownloadLinkUpdate": "https://github.com/Mara-Dawn/OOF/tree/main/releases/latest/download/latest.zip",
+        "DownloadLinkTesting": "https://github.com/Mara-Dawn/OOF/raw/main/releases/latest/download/latest.zip",
+        "DownloadLinkUpdate": "https://github.com/Mara-Dawn/OOF/raw/main/releases/latest/download/latest.zip",
         "DownloadCount": 0,
         "LastUpdated": "0"
     }
