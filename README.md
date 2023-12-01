@@ -1,16 +1,17 @@
 ![oof plugin logo](/Data/logo.png)
 # OOF!
 
+This is my fork of the OOF! Plugin made by Frogworks-Interactive.
+
 Dalamud plugin that plays the oof sound when you take 
 - fall damage
 - die
 - party/alliance members die
 - run /oof command
 
-#### craaazzzy features!
- - use a custom sound file!
- - instant access to the hour long documentary on oof by hbomberguy!
- - fully featured settings window!
+#### features
+ - use a custom sound file
+ - fully featured settings window
 ### play oof sound:
 ```
 /oof
@@ -20,8 +21,5 @@ Dalamud plugin that plays the oof sound when you take
 /oofsettings
 ```
 
-
 ## install
-now in the dalamud repository! 
-
-open dalamud plugins options > turn on testing builds
+Drop `https://github.com/Mara-Dawn/MyDalamudPlugins/raw/master/pluginmaster.json` into your third party repo URL list.
