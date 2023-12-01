@@ -31,6 +31,7 @@ namespace OofPluginFixed
         [PluginService] public static Configuration Configuration { get; set; } = null!;
         [PluginService] public static PluginUI PluginUi { get; set; } = null!;
         [PluginService] public static IAddonLifecycle AddonLifecycle { get; private set; } = null!;
+        [PluginService] public static IPluginLog PluginLog { get; private set; } = null!;
     }
 
     public sealed class Plugin : IDalamudPlugin
@@ -139,7 +140,7 @@ namespace OofPluginFixed
             }
             catch (Exception e)
             {
-                PluginLog.Error("failed to check for oof condition:", e.Message);
+                Service.PluginLog.Error("failed to check for oof condition:", e.Message);
             }
         }
 
@@ -168,7 +169,7 @@ namespace OofPluginFixed
                     }
                     catch (Exception e)
                     {
-                        PluginLog.LogError("failed alliance check", e.Message);
+                        Service.PluginLog.Error("failed alliance check", e.Message);
                     }
                 }
                 if (Service.Configuration.OofOnDeathParty)
@@ -241,7 +242,7 @@ namespace OofPluginFixed
                 catch (Exception ex)
                 {
                     isSoundPlaying = false;
-                    PluginLog.Error("Failed read file", ex);
+                    Service.PluginLog.Error("Failed read file", ex);
                     return;
                 }
 
@@ -275,7 +276,7 @@ namespace OofPluginFixed
                     catch (Exception ex)
                     {
                         isSoundPlaying = false;
-                        PluginLog.Error("Failed play sound", ex);
+                        Service.PluginLog.Error("Failed play sound", ex);
                         return;
                     }
                 }
@@ -346,12 +347,8 @@ namespace OofPluginFixed
             }
             catch (Exception e)
             {
-                PluginLog.LogError("Failed to dispose oofplugin controller", e.Message);
+                Service.PluginLog.Error("Failed to dispose oofplugin controller", e.Message);
             }
-
-
         }
-
-
     }
 }
