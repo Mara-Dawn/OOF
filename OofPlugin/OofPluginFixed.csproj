@@ -87,6 +87,10 @@
       <Private>false</Private>
     </Reference>
   </ItemGroup>
-  <Import Project="$(DalamudLibPath)/targets/Dalamud.Plugin.targets"/>
+  <Import Project="$(DalamudLibPath)/targets/Dalamud.Plugin.targets" />
+	
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="if $(ConfigurationName) == Release (start XCOPY /Y /R &quot;$(TargetDir)\OofPluginFixed\latest.zip&quot; &quot;$(SolutionDir)\releases\latest\download\&quot;)" />
+  </Target>
 
 </Project>
