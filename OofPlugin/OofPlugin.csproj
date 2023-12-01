@@ -1,8 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-    <Authors>Frogworks Interactive</Authors>
-    <Company>Frogworks Interactive</Company>
+    <Authors>Mara Dawn</Authors>
     <Version>1.2.1.0</Version>
 		<AssemblyVersion>1.2.1.0</AssemblyVersion>
 
@@ -13,6 +12,9 @@
 	
     <PropertyGroup>
     <TargetFramework>net7.0-windows</TargetFramework>
+    <RootNamespace>OofPluginFixed</RootNamespace>
+    <AssemblyName>OofPluginFixed</AssemblyName>
+    <Product>OofPluginFixed</Product>
     <Platforms>x64</Platforms>
     <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>
